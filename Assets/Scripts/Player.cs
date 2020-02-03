@@ -2,122 +2,135 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+enum Direction
+{
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    NONE
+}
+
 public class Player : MonoBehaviour
 {
-    private GameObject destinationGO = null;
     private GameObject gridGO = null;
-    private int index = 0;
-    private int destinationRow = 0;
-    private int destinationColumn = 0;
-    private int currentRow = 0;
-    private int currentColumn = 0;
+    private int currentIndex = 0;
+    private int rows = 0;
+    private int columns = 0;
+    private int destinationIndex = 0;
+    private Direction direction = Direction.NONE;
    
-    public void StartGame(GameObject destinationGO, GameObject gridGO, int rows, int columns)
+    public void StartGame(GameObject gridGO, int startIndex, int destinationIndex, int rows, int columns)
     {
-        this.destinationGO = destinationGO;
         this.gridGO = gridGO;
-        destinationRow = rows;
-        destinationColumn = columns;
-        currentRow = 1;
-        currentColumn = 1;
+        currentIndex = startIndex;
+        this.destinationIndex = destinationIndex;
+        this.rows = rows;
+        this.columns = columns;
+        /*if (currentIndex < destinationIndex)
+            direction = Direction.UP;
+        else*/
+            direction = Direction.DOWN;
+
         InvokeRepeating("Move", 0.0f, 1.0f);
     }
 
     private void Move()
     {
-        var currentIndex = ((currentRow - 1) * destinationColumn) + (currentColumn - 1);
-        if(MoveUp(currentIndex))
-        {
-
-        }
-        else if(MoveRight(currentIndex))
-        {
-
-        }
-        else if(MoveDown(currentIndex))
-        {
-
-        }
-        else if(MoveLeft(currentIndex))
-        {
-
-        }
-        
-
-        if(IsDestinationReached())
-        {
-            Debug.Log("Reached goal");
-        }
+        List<Direction> attempted = new List<Direction>();
+        currentIndex = GetNextIndex(attempted);
+        transform.position = gridGO.transform.GetChild(currentIndex).position;
     }
 
-    private bool MoveRight(int currentIndex)
+    private int GetNextIndex(List<Direction> attempted)
     {
-        if (currentIndex % destinationColumn != destinationColumn -1 )
+        var currentRow = currentIndex / columns;
+        var destinationRow = destinationIndex / columns;
+        var nextIndex = -1;
+        attempted.Add(direction);
+
+        if (currentRow > destinationRow)
         {
-            var nextIndex = currentIndex + 1;
-            var tile = gridGO.transform.GetChild(nextIndex).GetComponent<Tile>();
-            if (tile.IsWalkable())
+            var tempIndex = -1;
+            switch (direction)
             {
-                transform.position = tile.transform.position;
-                currentColumn++;
-                return true;
+                case Direction.UP:
+                    tempIndex = currentIndex + columns;
+                    if (isTileWalkable(tempIndex))
+                    {
+                        nextIndex = tempIndex;
+                    }
+                    else
+                    {
+                        if (tempIndex < destinationIndex)
+                            direction = Direction.RIGHT;
+                        else
+                            direction = Direction.LEFT;
+                    }
+                    break;
+                case Direction.DOWN:
+                    tempIndex = currentIndex - columns;
+                    if(isTileWalkable(tempIndex))
+                    {
+                        nextIndex = tempIndex;
+                    }
+                    else
+                    {
+                        if (tempIndex < destinationIndex)
+                        {
+                            direction = Direction.RIGHT;
+                        }
+                        else
+                        {
+                            direction = Direction.LEFT;
+                        }
+                    }
+                    break;
+                case Direction.RIGHT:
+                    tempIndex = currentIndex + 1;
+                    if (isTileWalkable(tempIndex))
+                    {
+                        nextIndex = tempIndex;
+                    }
+                    else
+                    {
+                       direction = Direction.LEFT;
+                    }
+                    break;
+                case Direction.LEFT:
+                    nextIndex = currentIndex - 1;
+                    if (isTileWalkable(tempIndex))
+                    {
+                        nextIndex = tempIndex;
+                    }
+                    else
+                    {
+                        direction = Direction.RIGHT;
+                    }
+                    break;
             }
         }
-
-        return false;
-    }
-
-    private bool MoveLeft(int currentIndex)
-    {
-        if (currentIndex % destinationColumn != 0)
+        else if(currentRow < destinationRow)
         {
-            var nextIndex = currentIndex - 1;
-            var tile = gridGO.transform.GetChild(nextIndex).GetComponent<Tile>();
-            if (tile.IsWalkable())
-            {
-                transform.position = tile.transform.position;
-                currentColumn--;
-                return true;
-            }
+
         }
-        
-        return false;
-    }
-
-    private bool MoveUp(int currentIndex)
-    {
-        var nextIndex = currentIndex + destinationColumn;
-        if (nextIndex < destinationColumn * destinationRow)
+        else
         {
-            var tile = gridGO.transform.GetChild(nextIndex).GetComponent<Tile>();
-            if (tile.IsWalkable())
-            {
-                transform.position = tile.transform.position;
-                currentRow++;
-                return true;
-            }
+
         }
 
-        return false;
+        if (nextIndex < 0)
+            nextIndex = GetNextIndex(attempted);
+
+        return nextIndex;
     }
 
-    private bool MoveDown(int currentIndex)
-    {
-        var nextIndex = currentIndex - destinationColumn;
-        if(nextIndex < destinationColumn * destinationRow)
-        {
-            var tile = gridGO.transform.GetChild(nextIndex).GetComponent<Tile>();
-            if (tile.IsWalkable())
-            {
-                transform.position = tile.transform.position;
-                currentRow--;
-                return true;
-            }
-        }
-        return false;
-    }
+   
+   
 
-    private bool IsDestinationReached()
+    
+   
+    /*private bool IsDestinationReached()
     {
         if (currentRow == destinationRow && currentColumn == destinationColumn)
         {
@@ -125,6 +138,11 @@ public class Player : MonoBehaviour
         }
 
         return false;
+    }*/
+
+    private bool isTileWalkable(int index)
+    {
+        return gridGO.transform.GetChild(index).GetComponent<Tile>().IsWalkable();
     }
 }
 

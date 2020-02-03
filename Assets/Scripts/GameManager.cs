@@ -14,6 +14,9 @@ public class GameManager : MonoBehaviour
     private GameObject gridGO = null;
     private GameObject playerGO = null;
     private GameObject destinationGO = null;
+    private string spawnType = null;
+    private int startIndex = -1;
+    private int destinationIndex = -1;
 
     void Start()
     {
@@ -28,15 +31,31 @@ public class GameManager : MonoBehaviour
         {
             Vector3 point = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(point, Camera.main.transform.forward);
-            if(hit.collider)
-                hit.collider.gameObject.GetComponent<Tile>().Click();
+            if (hit.collider)
+            {
+                var tile = hit.collider.GetComponent<Tile>();
+                if (spawnType == "StartPoint")
+                {
+                    startIndex = tile.Index;
+                    UpdatePlayerPosition();
+                }
+                else if (spawnType == "EndPoint")
+                {
+                    destinationIndex = tile.Index;
+                    UpdateDestinationPosition();
+                }
+                else if (spawnType == "Path")
+                {
+                    hit.collider.gameObject.GetComponent<Tile>().Click();
+                }
+            }
         }
     }
 
     public void StartGame()
     {
         isGameStarted = true;
-        playerGO.GetComponent<Player>().StartGame(destinationGO,gridGO,Rows,Columns);
+        playerGO.GetComponent<Player>().StartGame(gridGO,startIndex,destinationIndex,Rows,Columns);
     }
 
     private void SpawnGrid()
@@ -64,6 +83,7 @@ public class GameManager : MonoBehaviour
                 spawnPos.x = startX + j * unitDistance;
                 spawnPos.y = startY + i * unitDistance;
                 tile.transform.position = spawnPos;
+                tile.GetComponent<Tile>().Index = i*Columns + j;
             }
         }
     }
@@ -71,12 +91,29 @@ public class GameManager : MonoBehaviour
     private void SpawnPlayer()
     {
         playerGO = Instantiate(PlayerPrefab) as GameObject;
-        playerGO.transform.position = gridGO.transform.GetChild(0).position;
+        startIndex = 0;
+        UpdatePlayerPosition();
+    }
+
+    private void UpdatePlayerPosition()
+    {
+        playerGO.transform.position = gridGO.transform.GetChild(startIndex).position;
     }
 
     private void SpawnDestination()
     {
         destinationGO = Instantiate(DestinationPrefab) as GameObject;
-        destinationGO.transform.position = gridGO.transform.GetChild(Rows * Columns - 1).position;
+        destinationIndex = Rows * Columns - 1;
+        UpdateDestinationPosition();
+    }
+
+    private void UpdateDestinationPosition()
+    {
+        destinationGO.transform.position = gridGO.transform.GetChild(destinationIndex).position;
+    }
+
+    public void SetSpawnType(string spawnType)
+    {
+        this.spawnType = spawnType;
     }
 }
