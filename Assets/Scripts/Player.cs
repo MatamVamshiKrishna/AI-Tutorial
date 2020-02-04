@@ -27,19 +27,31 @@ public class Player : MonoBehaviour
         this.destinationIndex = destinationIndex;
         this.rows = rows;
         this.columns = columns;
-        /*if (currentIndex < destinationIndex)
+        var currentRow = currentIndex / columns;
+        var destinationRow = destinationIndex / columns;
+        if (currentRow < destinationRow)
             direction = Direction.UP;
-        else*/
-        direction = Direction.DOWN;
+        else if (currentRow > destinationRow)
+            direction = Direction.DOWN;
+        else
+        {
+            if (currentIndex < destinationIndex)
+                direction = Direction.RIGHT;
+            else
+                direction = Direction.LEFT;
+        }
 
         InvokeRepeating("Move", 0.0f, 1.0f);
     }
 
     private void Move()
     {
-        List<Direction> attempted = new List<Direction>();
-        currentIndex = GetNextIndex(attempted);
-        transform.position = gridGO.transform.GetChild(currentIndex).position;
+        if(currentIndex != destinationIndex)
+        {
+            List<Direction> attempted = new List<Direction>();
+            currentIndex = GetNextIndex(attempted);
+            transform.position = gridGO.transform.GetChild(currentIndex).position;
+        }
     }
 
     private int GetNextIndex(List<Direction> attempted)
