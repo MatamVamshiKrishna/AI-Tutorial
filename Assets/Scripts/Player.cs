@@ -60,6 +60,22 @@ public class Player : MonoBehaviour
         var destinationRow = destinationIndex / columns;
         var nextIndex = -1;
 
+        if(attempted.Count == 0)
+        {
+            if (currentRow < destinationRow && direction != Direction.DOWN)
+                direction = Direction.UP;
+            else if (currentRow > destinationRow && direction != Direction.UP)
+                direction = Direction.DOWN;
+            else
+            {
+                var equivalentIndex = currentIndex + (columns * (destinationRow - currentRow));
+                if (equivalentIndex < destinationIndex)
+                    direction = Direction.RIGHT;
+                else
+                    direction = Direction.LEFT;
+            }
+        }
+
         switch (direction)
         {
             case Direction.UP:
@@ -96,7 +112,7 @@ public class Player : MonoBehaviour
                 }
                 else
                 {
-                    if (equivalentIndex < destinationIndex)
+                    if (equivalentIndex <= destinationIndex)
                     {
                         if (!attempted.Contains(Direction.RIGHT))
                         {
@@ -106,7 +122,7 @@ public class Player : MonoBehaviour
                         }
                     }
 
-                    if (equivalentIndex > destinationIndex)
+                    if (equivalentIndex >= destinationIndex)
                     {
                         if (!attempted.Contains(Direction.LEFT))
                         {
@@ -134,7 +150,7 @@ public class Player : MonoBehaviour
                 }
                 else
                 {
-                    if (equivalentIndex < destinationIndex)
+                    if (equivalentIndex <= destinationIndex)
                     {
                         if (!attempted.Contains(Direction.RIGHT))
                         {
@@ -144,7 +160,7 @@ public class Player : MonoBehaviour
                         }
                     }
 
-                    if (equivalentIndex > destinationIndex)
+                    if (equivalentIndex >= destinationIndex)
                     {
                         if (!attempted.Contains(Direction.LEFT))
                         {
