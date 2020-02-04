@@ -29,15 +29,55 @@ public class Player : MonoBehaviour
         this.rows = rows;
         this.columns = columns;
 
-        gridGO.transform.GetChild(destinationIndex).GetComponent<Tile>().Weight = 0;
+        //gridGO.transform.GetChild(destinationIndex).GetComponent<Tile>().Weight = 0;
 
         //SetWeightAndDirection(destinationIndex);
-        FillColumnsToRight(0, destinationIndex);
-        FillColumnsToLeft(0, destinationIndex);
-        FillColumnsToUp(0, destinationIndex);
-        FillColumnsToDown(0, destinationIndex);
+        FillColumnsToRight(1, destinationIndex);
+        FillColumnsToLeft(1, destinationIndex);
+        FillColumnsToUp(1, destinationIndex);
+        FillColumnsToDown(1, destinationIndex);
 
+        var gridT = gridGO.transform;
+        for(int k=0;k<rows*columns;++k)
+        {
+            for(int i=0;i<gridT.childCount;++i)
+            {
+                if (i == startIndex || i == destinationIndex)
+                    continue;
+                
 
+                if(gridT.GetChild(i).GetComponent<Tile>().Weight == 1)
+                {
+                    int minWeight = rows * columns; // max number
+                    if (IsValidRight(i) && IsTileWalkable(i+1))
+                    {
+                        if(gridT.GetChild(i + 1).GetComponent<Tile>().Weight != 1)
+                        minWeight = Mathf.Min(minWeight, gridT.GetChild(i + 1).GetComponent<Tile>().Weight);
+                    }
+                    if (IsValidLeft(i) && IsTileWalkable(i-1))
+                    {
+                        if(gridT.GetChild(i - 1).GetComponent<Tile>().Weight != 1)
+                        minWeight = Mathf.Min(minWeight, gridT.GetChild(i - 1).GetComponent<Tile>().Weight);
+                    }
+                    if (IsValidUp(i) && IsTileWalkable(i+columns))
+                    {
+                        if(gridT.GetChild(i + columns).GetComponent<Tile>().Weight != 1)
+                        minWeight = Mathf.Min(minWeight, gridT.GetChild(i + columns).GetComponent<Tile>().Weight);
+                    }
+                    if (IsValidDown(i) && IsTileWalkable(i-columns))
+                    {
+                        if(gridT.GetChild(i - columns).GetComponent<Tile>().Weight != 1)
+                        minWeight = Mathf.Min(minWeight, gridT.GetChild(i - columns).GetComponent<Tile>().Weight);
+                    }
+
+                    if (minWeight != rows * columns)
+                    {
+                        gridT.GetChild(i).GetComponent<Tile>().SetWeight(minWeight);
+                    }
+
+                }
+            }
+        }
 
 
         /*var currentRow = currentIndex / columns;
@@ -54,8 +94,72 @@ public class Player : MonoBehaviour
                 direction = Direction.LEFT;
         }*/
 
-        //InvokeRepeating("Move", 0.0f, 1.0f);
+        InvokeRepeating("Move", 0.0f, 1.0f);
     }
+
+    /*private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.O))
+        {
+            Debug.Log("Called");
+            var gridT = gridGO.transform;
+            for (int i = 0; i < gridT.childCount; ++i)
+            {
+                if (i == currentIndex || i == destinationIndex)
+                    continue;
+
+
+                if (gridT.GetChild(i).GetComponent<Tile>().Weight == 1)
+                {
+                    int minWeight = rows * columns; // max number
+                    Debug.Log("index start");
+                    Debug.Log("index" + i + "weight" + minWeight);
+                    if (IsValidRight(i) && IsTileWalkable(i + 1))
+                    {
+                        Debug.Log(gridT.GetChild(i + 1).GetComponent<Tile>().Weight);
+                        if (gridT.GetChild(i + 1).GetComponent<Tile>().Weight != 1)
+                            minWeight = Mathf.Min(minWeight, gridT.GetChild(i + 1).GetComponent<Tile>().Weight);
+                        Debug.Log("right index" + i + "weight" + minWeight);
+                    }
+                    if (IsValidLeft(i) && IsTileWalkable(i - 1))
+                    {
+                        if (gridT.GetChild(i - 1).GetComponent<Tile>().Weight != 1)
+                            minWeight = Mathf.Min(minWeight, gridT.GetChild(i - 1).GetComponent<Tile>().Weight);
+                        Debug.Log("left index" + i + "weight" + minWeight);
+                    }
+                    if (IsValidUp(i) && IsTileWalkable(i + columns))
+                    {
+                        if (gridT.GetChild(i + columns).GetComponent<Tile>().Weight != 1)
+                            minWeight = Mathf.Min(minWeight, gridT.GetChild(i + columns).GetComponent<Tile>().Weight);
+                        Debug.Log("up index" + i + "weight" + minWeight);
+                    }
+                    if (IsValidDown(i) && IsTileWalkable(i - columns))
+                    {
+                        if (gridT.GetChild(i - columns).GetComponent<Tile>().Weight != 1)
+                            minWeight = Mathf.Min(minWeight, gridT.GetChild(i - columns).GetComponent<Tile>().Weight);
+                        Debug.Log("down index" + i + "weight" + minWeight);
+                    }
+
+                    Debug.Log("index" + i+ "weight" + minWeight);
+
+                    if (minWeight != rows * columns)
+                    {
+                        gridT.GetChild(i).GetComponent<Tile>().SetWeight(minWeight);
+                        //bAllFilled = bAllFilled && true;
+                    }
+                    else
+                    {
+                        //bAllFilled = bAllFilled && false;
+                    }
+
+                }
+                else
+                {
+                    //bAllFilled = bAllFilled && true;
+                }
+            }
+        }
+    }*/
 
     private void Move()
     {
@@ -65,13 +169,13 @@ public class Player : MonoBehaviour
         }
 
         var gridT = gridGO.transform;
-        var minWeight = 100;
+        var minWeight = rows * columns;
         var weight = 0;
         var nextIndex = -1;
         if(IsValidRight(currentIndex))
         {
             weight = gridT.GetChild(currentIndex + 1).GetComponent<Tile>().Weight;
-            if(weight < minWeight)
+            if(weight < minWeight && (weight != 1 || currentIndex+1 == destinationIndex))
             {
                 minWeight = weight;
                 nextIndex = currentIndex + 1;
@@ -81,7 +185,7 @@ public class Player : MonoBehaviour
         if (IsValidLeft(currentIndex))
         {
             weight = gridT.GetChild(currentIndex - 1).GetComponent<Tile>().Weight;
-            if (weight < minWeight)
+            if (weight < minWeight && (weight != 1 || currentIndex - 1 == destinationIndex))
             {
                 minWeight = weight;
                 nextIndex = currentIndex - 1;
@@ -91,7 +195,7 @@ public class Player : MonoBehaviour
         if (IsValidUp(currentIndex))
         {
             weight = gridT.GetChild(currentIndex + columns).GetComponent<Tile>().Weight;
-            if (weight < minWeight)
+            if (weight < minWeight && (weight != 1 || currentIndex + columns == destinationIndex))
             {
                 minWeight = weight;
                 nextIndex = currentIndex + columns;
@@ -101,7 +205,7 @@ public class Player : MonoBehaviour
         if (IsValidDown(currentIndex))
         {
             weight = gridT.GetChild(currentIndex - columns).GetComponent<Tile>().Weight;
-            if (weight < minWeight)
+            if (weight < minWeight && (weight != 1 || currentIndex - columns == destinationIndex))
             {
                 minWeight = weight;
                 nextIndex = currentIndex - columns;
@@ -449,10 +553,12 @@ public class Player : MonoBehaviour
                 var nextTile = gridGO.transform.GetChild(nextTileIndex).GetComponent<Tile>();
                 nextTile.SetWeight(lastTileWeight);
                 lastTileWeight = nextTile.Weight;
+
+                FillColumnsToUp(lastTileWeight, nextTileIndex);
+                FillColumnsToDown(lastTileWeight, nextTileIndex);
+                FillColumnsToRight(lastTileWeight, nextTileIndex);
             }
-            FillColumnsToUp(lastTileWeight, nextTileIndex);
-            FillColumnsToDown(lastTileWeight, nextTileIndex);
-            FillColumnsToRight(lastTileWeight, nextTileIndex);
+           
         }
     }
 
@@ -466,10 +572,12 @@ public class Player : MonoBehaviour
                 var nextTile = gridGO.transform.GetChild(nextTileIndex).GetComponent<Tile>();
                 nextTile.SetWeight(lastTileWeight);
                 lastTileWeight = nextTile.Weight;
+
+                FillColumnsToUp(lastTileWeight, nextTileIndex);
+                FillColumnsToDown(lastTileWeight, nextTileIndex);
+                FillColumnsToLeft(lastTileWeight, nextTileIndex);
             }
-            FillColumnsToUp(lastTileWeight, nextTileIndex);
-            FillColumnsToDown(lastTileWeight, nextTileIndex);
-            FillColumnsToLeft(lastTileWeight, nextTileIndex);
+
         }
         
     }
@@ -485,10 +593,6 @@ public class Player : MonoBehaviour
                 nextTile.SetWeight(lastTileWeight);
                 FillColumnsToUp(nextTile.Weight, nextTileIndex);
             }
-            else
-            {
-                FillColumnsToUp(lastTileWeight, nextTileIndex);
-            }
         }
     }
 
@@ -502,10 +606,6 @@ public class Player : MonoBehaviour
                 var nextTile = gridGO.transform.GetChild(nextTileIndex).GetComponent<Tile>();
                 nextTile.SetWeight(lastTileWeight);
                 FillColumnsToDown(nextTile.Weight, nextTileIndex);
-            }
-            else
-            {
-                FillColumnsToDown(lastTileWeight, nextTileIndex);
             }
         }
     }
