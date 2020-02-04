@@ -19,7 +19,7 @@ public class Player : MonoBehaviour
     private int columns = 0;
     private int destinationIndex = 0;
     private Direction direction = Direction.NONE;
-   
+
     public void StartGame(GameObject gridGO, int startIndex, int destinationIndex, int rows, int columns)
     {
         this.gridGO = gridGO;
@@ -30,7 +30,7 @@ public class Player : MonoBehaviour
         /*if (currentIndex < destinationIndex)
             direction = Direction.UP;
         else*/
-            direction = Direction.DOWN;
+        direction = Direction.DOWN;
 
         InvokeRepeating("Move", 0.0f, 1.0f);
     }
@@ -47,89 +47,169 @@ public class Player : MonoBehaviour
         var currentRow = currentIndex / columns;
         var destinationRow = destinationIndex / columns;
         var nextIndex = -1;
-        attempted.Add(direction);
 
-        if (currentRow > destinationRow)
+        switch (direction)
         {
-            var tempIndex = -1;
-            switch (direction)
-            {
-                case Direction.UP:
-                    tempIndex = currentIndex + columns;
-                    if (isTileWalkable(tempIndex))
-                    {
-                        nextIndex = tempIndex;
-                    }
-                    else
-                    {
-                        if (tempIndex < destinationIndex)
-                            direction = Direction.RIGHT;
-                        else
-                            direction = Direction.LEFT;
-                    }
-                    break;
-                case Direction.DOWN:
-                    tempIndex = currentIndex - columns;
-                    if(isTileWalkable(tempIndex))
-                    {
-                        nextIndex = tempIndex;
-                    }
-                    else
-                    {
-                        if (tempIndex < destinationIndex)
-                        {
-                            direction = Direction.RIGHT;
-                        }
-                        else
-                        {
-                            direction = Direction.LEFT;
-                        }
-                    }
-                    break;
-                case Direction.RIGHT:
-                    tempIndex = currentIndex + 1;
-                    if (isTileWalkable(tempIndex))
-                    {
-                        nextIndex = tempIndex;
-                    }
-                    else
-                    {
-                       direction = Direction.LEFT;
-                    }
-                    break;
-                case Direction.LEFT:
-                    nextIndex = currentIndex - 1;
-                    if (isTileWalkable(tempIndex))
-                    {
-                        nextIndex = tempIndex;
-                    }
-                    else
-                    {
-                        direction = Direction.RIGHT;
-                    }
-                    break;
-            }
+            case Direction.UP:
+                nextIndex = currentIndex + columns;
+                break;
+            case Direction.DOWN:
+                nextIndex = currentIndex - columns;
+                break;
+            case Direction.LEFT:
+                nextIndex = currentIndex - 1;
+                break;
+            case Direction.RIGHT:
+                nextIndex = currentIndex + 1;
+                break;
         }
-        else if(currentRow < destinationRow)
-        {
 
+
+        if (IsValidNextIndex(nextIndex))
+        {
+            return nextIndex;
         }
         else
         {
+            attempted.Add(direction);
+            var equivalentIndex = currentIndex + (columns * (destinationRow - currentRow));
 
+            if (currentRow > destinationRow)
+            {
+                if (!attempted.Contains(Direction.DOWN))
+                {
+                    direction = Direction.DOWN;
+                    nextIndex = GetNextIndex(attempted);
+                    return nextIndex;
+                }
+                else
+                {
+                    if (equivalentIndex < destinationIndex)
+                    {
+                        if (!attempted.Contains(Direction.RIGHT))
+                        {
+                            direction = Direction.RIGHT;
+                            nextIndex = GetNextIndex(attempted);
+                            return nextIndex;
+                        }
+                    }
+
+                    if (equivalentIndex > destinationIndex)
+                    {
+                        if (!attempted.Contains(Direction.LEFT))
+                        {
+                            direction = Direction.LEFT;
+                            nextIndex = GetNextIndex(attempted);
+                            return nextIndex;
+                        }
+                    }
+
+                    if (!attempted.Contains(Direction.UP))
+                    {
+                        direction = Direction.UP;
+                        nextIndex = GetNextIndex(attempted);
+                        return nextIndex;
+                    }
+                }
+            }
+            else if (currentRow < destinationRow)
+            {
+                if (!attempted.Contains(Direction.UP))
+                {
+                    direction = Direction.UP;
+                    nextIndex = GetNextIndex(attempted);
+                    return nextIndex;
+                }
+                else
+                {
+                    if (equivalentIndex < destinationIndex)
+                    {
+                        if (!attempted.Contains(Direction.RIGHT))
+                        {
+                            direction = Direction.RIGHT;
+                            nextIndex = GetNextIndex(attempted);
+                            return nextIndex;
+                        }
+                    }
+
+                    if (equivalentIndex > destinationIndex)
+                    {
+                        if (!attempted.Contains(Direction.LEFT))
+                        {
+                            direction = Direction.LEFT;
+                            nextIndex = GetNextIndex(attempted);
+                            return nextIndex;
+                        }
+                    }
+
+                    if (!attempted.Contains(Direction.DOWN))
+                    {
+                        direction = Direction.DOWN;
+                        nextIndex = GetNextIndex(attempted);
+                        return nextIndex;
+                    }
+                }
+            }
+            else
+            {
+                if (equivalentIndex < destinationIndex)
+                {
+                    if (!attempted.Contains(Direction.RIGHT))
+                    {
+                        direction = Direction.RIGHT;
+                        nextIndex = GetNextIndex(attempted);
+                        return nextIndex;
+                    }
+
+                    if (!attempted.Contains(Direction.UP))
+                    {
+                        direction = Direction.UP;
+                        nextIndex = GetNextIndex(attempted);
+                        return nextIndex;
+                    }
+
+                    if (!attempted.Contains(Direction.DOWN))
+                    {
+                        direction = Direction.DOWN;
+                        nextIndex = GetNextIndex(attempted);
+                        return nextIndex;
+                    }
+                }
+
+                if (equivalentIndex > destinationIndex)
+                {
+                    if (!attempted.Contains(Direction.LEFT))
+                    {
+                        direction = Direction.LEFT;
+                        nextIndex = GetNextIndex(attempted);
+                        return nextIndex;
+                    }
+
+                    if (!attempted.Contains(Direction.UP))
+                    {
+                        direction = Direction.UP;
+                        nextIndex = GetNextIndex(attempted);
+                        return nextIndex;
+                    }
+
+                    if (!attempted.Contains(Direction.DOWN))
+                    {
+                        direction = Direction.DOWN;
+                        nextIndex = GetNextIndex(attempted);
+                        return nextIndex;
+                    }
+                }
+
+            }
+
+            return nextIndex;
         }
-
-        if (nextIndex < 0)
-            nextIndex = GetNextIndex(attempted);
-
-        return nextIndex;
     }
 
-   
-   
 
-    
-   
+
+
+
     /*private bool IsDestinationReached()
     {
         if (currentRow == destinationRow && currentColumn == destinationColumn)
@@ -140,9 +220,24 @@ public class Player : MonoBehaviour
         return false;
     }*/
 
-    private bool isTileWalkable(int index)
+    private bool IsTileWalkable(int index)
     {
         return gridGO.transform.GetChild(index).GetComponent<Tile>().IsWalkable();
     }
+
+    private bool IsValidNextIndex(int index)
+    {
+        if (index < 0 || index >= rows * columns)
+            return false;
+
+        if (direction == Direction.LEFT || direction == Direction.RIGHT)
+        {
+            if (index / columns != currentIndex / columns)
+                return false;
+        }
+
+        return IsTileWalkable(index);
+    }
+
 }
 
