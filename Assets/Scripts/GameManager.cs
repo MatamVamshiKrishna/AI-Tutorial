@@ -27,12 +27,13 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButtonDown(1))
         {
             Vector3 point = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(point, Camera.main.transform.forward);
             if (hit.collider)
             {
+                Debug.Log(hit.collider);
                 var tile = hit.collider.GetComponent<Tile>();
                 if (spawnType == "StartPoint")
                 {
