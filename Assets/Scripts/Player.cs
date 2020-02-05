@@ -32,12 +32,12 @@ public class Player : MonoBehaviour
         //gridGO.transform.GetChild(destinationIndex).GetComponent<Tile>().Weight = 0;
 
         //SetWeightAndDirection(destinationIndex);
-        FillColumnsToRight(1, destinationIndex);
-        FillColumnsToLeft(1, destinationIndex);
-        FillColumnsToUp(1, destinationIndex);
-        FillColumnsToDown(1, destinationIndex);
+       // FillColumnsToRight(1, destinationIndex);
+       // FillColumnsToLeft(1, destinationIndex);
+       // FillColumnsToUp(1, destinationIndex);
+       // FillColumnsToDown(1, destinationIndex);
 
-        var gridT = gridGO.transform;
+        /*var gridT = gridGO.transform;
         for(int k=0;k<rows*columns;++k)
         {
             for(int i=0;i<gridT.childCount;++i)
@@ -77,7 +77,7 @@ public class Player : MonoBehaviour
 
                 }
             }
-        }
+        }*/
 
 
         /*var currentRow = currentIndex / columns;
@@ -94,12 +94,24 @@ public class Player : MonoBehaviour
                 direction = Direction.LEFT;
         }*/
 
-        InvokeRepeating("Move", 0.0f, 1.0f);
+        //InvokeRepeating("Move", 0.0f, 1.0f);
     }
 
-    /*private void Update()
+    private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.O))
+        if(Input.GetKeyDown(KeyCode.S))
+            InvokeRepeating("Move", 0.0f, 1.0f);
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+            FillColumnsToRight(1, destinationIndex);
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+            FillColumnsToLeft(1, destinationIndex);
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+            FillColumnsToUp(1, destinationIndex);
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+            FillColumnsToDown(1, destinationIndex);
+
+        if (Input.GetKeyDown(KeyCode.O))
         {
             Debug.Log("Called");
             var gridT = gridGO.transform;
@@ -159,7 +171,7 @@ public class Player : MonoBehaviour
                 }
             }
         }
-    }*/
+    }
 
     private void Move()
     {
